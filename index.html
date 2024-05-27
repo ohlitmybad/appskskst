@@ -1046,10 +1046,18 @@ function updateMatchingNames() {
     teamElement.textContent = " " + age + ")";
     teamElement.classList.add("team");
     nameElement.appendChild(teamElement);
-
-    nameElement.addEventListener("click", function() {
-      searchInput.value = fullName; // Set the clicked name as the search input value
-      searchButton1.click(); // Trigger the search button click event
+    nameElement.addEventListener("click", function(event) {
+      const clickedElement = event.target.closest(".name");
+      if (clickedElement) {
+        const fullName = clickedElement.querySelector(".fullName").textContent;
+        const age = clickedElement.querySelector(".age").textContent.trim();
+        const team = clickedElement.querySelector(".team").textContent.trim().replace(/[^a-zA-Z\s]/g, ''); // Remove non-alphanumeric characters
+        const searchQuery = fullName + "," + age.substring(1, age.length - 1) + "," + team;
+    
+        searchInput.value = searchQuery; // Set the full query as the search input value
+        const enterKeyEvent = new KeyboardEvent("keyup", { key: "Enter" });
+        searchInput.dispatchEvent(enterKeyEvent); // Dispatch enter key event
+      }
     });
 
     matchingNamesContainer.appendChild(nameElement);
@@ -2092,11 +2100,44 @@ let searchResults = []; // Declare the search results variable
     }
 
     function search(query) {
-      const results = dataArray.filter(data =>
-        removeSpecialChars(data[1].toLowerCase()).includes(removeSpecialChars(query.toLowerCase()))
-      );
-  return results;
+      const queryParts = query.split(',').map(part => part.trim()); // Split the query by commas and trim whitespace
+      const name = queryParts[0]; // Extract the name part
+      let age, team;
+      
+      // Extract age and team if they exist
+      if (queryParts.length > 1) {
+        age = queryParts[1].trim(); // Trim any leading or trailing spaces
+        if (queryParts.length > 2) {
+          team = queryParts[2].trim(); // Trim any leading or trailing spaces
+        }
+      }
+    
+      console.log("Query Parts:", queryParts);
+    
+      const results = dataArray.filter(data => {
+        const normalizedName = removeSpecialChars(data[1].toLowerCase());
+        const normalizedTeam = removeSpecialChars(data[2].toLowerCase());
+        const normalizedAge = data[3].trim().toLowerCase(); // Trim any leading or trailing spaces
+    
+        console.log("Normalized Data:", normalizedName, normalizedAge, normalizedTeam);
+        console.log("Query Data:", name, age, team);
+    
+        // Check if the name matches
+        const nameMatches = normalizedName.includes(removeSpecialChars(name.toLowerCase()));
+    
+        // Check if the age matches (or if age is not provided)
+        const ageMatches = !age || normalizedAge === removeSpecialChars(age.toLowerCase());
+    
+        // Check if the team matches (or if team is not provided)
+        const teamMatches = !team || normalizedTeam === removeSpecialChars(team.toLowerCase());
+    
+        // Return true if name matches and either age or team matches
+        return nameMatches && (ageMatches || teamMatches);
+      });
+    
+      return results;
     }
+    
 
 
 function createTable(teamName, teamIndex, color) {
