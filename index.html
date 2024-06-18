@@ -1192,11 +1192,7 @@ ctx.fillText('datamb.football', 345, 476);
             const csvData = xhr.responseText;
             let dataArray = csvData.trim().split('\n').map(line => line.split(','));
             
-            // Remove the last line if it's empty (assuming the last line is empty based on your issue)
-            if (dataArray[dataArray.length - 1].length === 1 && dataArray[dataArray.length - 1][0].trim() === '') {
-                dataArray.pop(); // Remove the last element if it's empty
-            }
-
+  
 
 function calculateEuclideanDifference(data1, data2) {
   let difference = 0;
